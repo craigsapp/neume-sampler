@@ -1,0 +1,42 @@
+---
+---
+
+
+ul.social-media-list li a {
+	white-space: nowrap;
+}
+
+
+ul.social-media-list li svg {
+	display: inline-block !important;
+}
+
+
+.wrapper {
+	margin-left:    0px !important;
+	margin-right:   0px !important;
+	padding-left:  50px !important;
+	padding-right: 50px !important;
+}
+
+
+footer h2.footer-heading {
+	display: none !important;
+}
+
+
+main {
+	margin-left:    0px !important;
+	margin-right:   0px !important;
+}
+
+
+footer {
+	background-color: blue;
+}
+
+
+@import "{{site.theme }}";
+
+
+
