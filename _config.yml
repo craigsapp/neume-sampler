@@ -1,6 +1,7 @@
 title: Neume Sampler
 description: Neume sampler demonstration
 github_username: craigsapp/neume-sampler
+url: "https://neume-sampler.sapp.org"
 
 theme: Minima
 #Architect
@@ -15,5 +16,18 @@ theme: Minima
 #Slate
 #Tactile
 #Time machine
+
+
+exclude:
+  - .sass-cache/
+  - .jekyll-cache/
+  - gemfiles/
+  - Gemfile
+  - Gemfile.lock
+  - node_modules/
+  - vendor/bundle/
+  - vendor/cache/
+  - vendor/gems/
+  - vendor/ruby/
 
 
