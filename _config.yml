@@ -3,19 +3,19 @@ description: Neume sampler demonstration
 github_username: craigsapp/neume-sampler
 url: "https://neume-sampler.sapp.org"
 
-theme: Minima
-#Architect
-#Cayman
-#Dinky
-#Hacker
-#Leap day
-#Merlot
-#Midnight
-#Minimal
-#Modernist
-#Slate
-#Tactile
-#Time machine
+theme: minima
+#architect
+#cayman
+#dinky
+#hacker
+#leap day
+#merlot
+#midnight
+#minimal
+#modernist
+#slate
+#tactile
+#time machine
 
 
 exclude:
