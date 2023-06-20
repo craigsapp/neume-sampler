@@ -53,10 +53,10 @@ function displayList(metadata) {
 	}
 	let lastNeume = "XXXXX";
 	output += `<h2 onclick="toggleVisibility(event)" class="neume-heading">`;
-	output += ` ${metadata[0].Neume} </h2><div class="neume-list">`;
+	output += ` ${metadata[0].Name} </h2><div class="neume-list">`;
 	for (let i=0; i<metadata.length; i++) {
 		let m = metadata[i];
-		let neume = m.Neume;
+		let neume = m.Name;
 		if ((i > 0) && (neume !== lastNeume)) {
 			output += `</div><h2 onclick="toggleVisibility(event)" style="cursor:pointer;"`;
 			output += ` class="neume-heading">${neume}</h2><div class="neume-list hidden">`;
@@ -200,8 +200,18 @@ function getInputInteger(selector) {
 
 function sortByNeume(metadata) {
 	metadata.sort(function(a, b) {
-		let neumeA = a.Neume;
-		let neumeB = b.Neume;
+		let catA = a.Category;
+		let catB = b.Category;
+		
+		if (catA === "neume") { catA = "a"; }
+		if (catB === "neume") { catB = "a"; }
+		if (catA !== catB) {
+			return catA.toLocaleLowerCase().localeCompare(catB.toLocaleLowerCase());
+		}
+
+		let neumeA = a.Name;
+		let neumeB = b.Name;
+
 		if (neumeA === "?") { neumeA = "z"; }
 		if (neumeB === "?") { neumeB = "z"; }
 		if (!neumeA) { neumA = "z" }
