@@ -1,0 +1,258 @@
+
+
+<script>
+
+let DATA = {};
+
+document.addEventListener("DOMContentLoaded", function () {
+	let mid = "AKfycbz6DgWXf77ZfXe7DcYa7tIvyc3ZPFtBZChkqwyTZmIpu9VaCCbhWRgBjHAxMuHAwQjG";
+	let url = `https://script.google.com/macros/s/${mid}/exec`;
+	console.log("DOWNLOADING METADATA FROM URL", url);
+
+	fetch(url)
+		.then(response => response.json())
+		.then(json => {
+			DATA.METADATA = json;
+			displayList(DATA.METADATA);
+		})
+		.catch(error => {
+			console.error('Error downloading JSON:', error);
+		});
+	
+});
+
+
+//////////////////////////////
+//
+// displayList --
+//
+
+function displayList(metadata) {
+	if (!metadata) {
+		metadata = DATA.METADATA;
+	}
+	let isElement = document.querySelector("#image-size");
+	let imageSize = 100;
+	if (isElement) {
+		imageSize = parseInt(isElement.value);
+	}
+	let percent = imageSize;;
+
+	let hElement = document.querySelector("input#horizontal");
+	let vElement = document.querySelector("input#vertical");
+
+	let hPad = getInputInteger("input#horizontal");
+	let vPad = getInputInteger("input#vertical");
+
+	metadata = sortByNeume(metadata);
+	let output = "";
+	let element = document.querySelector("#results");
+	if (!element) {
+		console.error("ERROR: Cannot find #results");
+		return;
+	}
+	let lastNeume = "XXXXX";
+	output += `<h2 onclick="toggleVisibility(event)" class="neume-heading">`;
+	output += ` ${metadata[0].Neume} </h2><div class="neume-list">`;
+	for (let i=0; i<metadata.length; i++) {
+		let m = metadata[i];
+		let neume = m.Neume;
+		if ((i > 0) && (neume !== lastNeume)) {
+			output += `</div><h2 onclick="toggleVisibility(event)" style="cursor:pointer;"`;
+			output += ` class="neume-heading">${neume}</h2><div class="neume-list hidden">`;
+		}
+		let imageUrl = prepareImageUrl(m["Image URL"], hPad, vPad);
+		imageUrl = addPercentage(imageUrl, percent);
+		output += `<img style="padding:10px;" src="${imageUrl}">`;
+		lastNeume = neume;
+	}
+	output += "</div>";
+	element.innerHTML = output;
+}
+
+
+
+//////////////////////////////
+//
+// addPercentage --
+//
+
+function addPercentage(url, percent) {
+	if (!percent) {
+		return url;
+	}
+	percent = parseInt(percent);
+	if (percent == 100) {
+		return url;
+	}
+	if (percent < 5) {
+		return url;
+	}
+	if (percent > 100) {
+		return url;
+	}
+	if (url.match(/\/pct:\d+\//)) {
+		return url.replace(/\/pct:\d+\//, `/pct:${percent}/`);
+	}
+	let matches = url.match(/^(.*\/\d+,\d+,\d+,\d+\/)full(.*)/);
+	if (!matches) {
+		return url;
+	}
+	let preUrl  = matches[1];
+	let postUrl = matches[2];
+	let newUrl  = `${preUrl}pct:${percent}/${postUrl}`;
+	return newUrl;
+}
+
+
+
+//////////////////////////////
+//
+// toggleVisibility --
+//
+
+function toggleVisibility(event) {
+	let target = event.target;
+	let element = target.nextElementSibling;
+	if (!element) {
+		return;
+	}
+	let all = document.querySelectorAll(".neume-list");
+	for (let i=0; i<all.length; i++) {
+		if (all[i] == element) {
+			if (element.classList.contains("hidden")) {
+				element.classList.remove("hidden");
+			} else {
+				element.classList.add("hidden");
+			}
+		} else {
+			all[i].classList.add("hidden");
+		}
+	}
+}
+
+
+
+//////////////////////////////
+//
+// prepareImageUrl --
+//
+
+function prepareImageUrl(url, hPad, vPad) {
+	if ((vPad == 0) && (vPad == hPad)) {
+		return url;
+	}
+	let matches = url.match(/^(.*\/)(\d+),(\d+),(\d+),(\d+)(\/.*)$/);
+	if (!matches) {
+		console.log("INVALID URL", url);
+		return url;
+	}
+	let preUrl = matches[1];
+	let x = parseInt(matches[2]);
+	let y = parseInt(matches[3]);
+	let w = parseInt(matches[4]);
+	let h = parseInt(matches[5]);
+	let postUrl = matches[6];
+
+	if (hPad > 0) {
+		x -= parseInt(hPad / 2);
+		w += hPad;
+	}
+	if (vPad > 0) {
+		y -= parseInt(vPad / 2);
+		h += vPad;
+	}
+
+	let xywh = `${x},${y},${w},${h}`;
+	let newurl = `${preUrl}${xywh}${postUrl}`;
+	return newurl;
+}
+
+
+
+//////////////////////////////
+//
+// getInputInteger --
+//
+
+function getInputInteger(selector) {
+	let element = document.querySelector(selector);
+	if (!element) {
+		return 0;
+	}
+	let value = element.value;
+	if (value.match(/^\s*$/)) {
+		return 0;
+	}
+	let matches = value.match(/^(\d+)/);
+	if (!matches) {
+		return 0;
+	}
+	return parseInt(matches[1]);
+}
+
+
+
+//////////////////////////////
+//
+// sortByNeume --
+//
+
+function sortByNeume(metadata) {
+	metadata.sort(function(a, b) {
+		let neumeA = a.Neume;
+		let neumeB = b.Neume;
+		if (neumeA === "?") { neumeA = "z"; }
+		if (neumeB === "?") { neumeB = "z"; }
+		if (!neumeA) { neumA = "z" }
+		if (!neumeB) { neumB = "z" }
+		neumeA = neumeA.toLocaleLowerCase().trim();
+		neumeb = neumeB.toLocaleLowerCase().trim();
+		if (neumeA !== neumeB) {
+			return neumeA.localeCompare(neumeB);
+		}
+		let contA = a.Contour;
+		let contB = b.Contour;
+		if (!contA) { return -1; }
+		if (!contB) { return +1; }
+		if (contA === contB) {
+			return 0;
+		}
+		return contA.trim().localeCompare(contB.trim());
+	});
+	return metadata;
+}
+
+
+
+//////////////////////////////
+//
+// showAllNeumeLists --
+//
+
+function showAllNeumeLists() {
+	let all = document.querySelectorAll(".neume-list");
+	let openCount = 0;
+	for (let i=0; i<all.length; i++) {
+		if (!all[i].classList.contains("hidden")) {
+			openCount++;
+			continue;
+		}
+		all[i].classList.remove("hidden");
+	}
+	if (openCount != all.length) {
+		return;
+	}
+	// Hide all lists since they are all open:
+	for (let i=0; i<all.length; i++) {
+		all[i].classList.add("hidden");
+	}
+
+}
+
+
+
+</script>
+
+
+
