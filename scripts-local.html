@@ -1,6 +1,7 @@
 
 
 <script>
+// vim: ts=3
 
 let DATA = {};
 
@@ -8,6 +9,7 @@ document.addEventListener("DOMContentLoaded", function () {
 	let mid = "AKfycbz6DgWXf77ZfXe7DcYa7tIvyc3ZPFtBZChkqwyTZmIpu9VaCCbhWRgBjHAxMuHAwQjG";
 	let url = `https://script.google.com/macros/s/${mid}/exec`;
 	console.log("DOWNLOADING METADATA FROM URL", url);
+	setDefaultImageSize();
 
 	fetch(url)
 		.then(response => response.json())
@@ -36,7 +38,8 @@ function displayList(metadata) {
 	if (isElement) {
 		imageSize = parseInt(isElement.value);
 	}
-	let percent = imageSize;;
+	localStorage.imageSize = imageSize;
+	let percent = imageSize;
 
 	let hElement = document.querySelector("input#horizontal");
 	let vElement = document.querySelector("input#vertical");
@@ -266,6 +269,23 @@ function showAllNeumeLists() {
 
 }
 
+
+//////////////////////////////
+//
+// setDefaultImageSize --
+//
+
+function setDefaultImageSize() {
+	let imageSize = localStorage.imageSize;
+	if (!imageSize) {
+		return;
+	}
+	let select = document.querySelector("select#image-size");
+	if (!select) {
+		return;
+	}
+	select.value = imageSize;
+}
 
 
 </script>
