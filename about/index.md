@@ -5,8 +5,8 @@ title: "About"
 
 This website demonstrates how to create a neume sampler
 and was created for the FCT-funded research project
-<a target="_blank" href="">Echoes from the Past: Unveiling a Lost Soundscape with Digital
-Analysis</a> (ECHOES) (2022.01957.PTDC) running from 03/2023-02/2026, run
+<i>Echoes from the Past: Unveiling a Lost Soundscape with Digital
+Analysis</i> (ECHOES) (2022.01957.PTDC) running from 03/2023-02/2026, run
 by co-PIs 
 <a target="_blank" href="https://cesem.fcsh.unl.pt/en/pessoa/elsa-de-luca-2/">Elsa de Luca<a/> 
 and 
