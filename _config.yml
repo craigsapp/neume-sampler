@@ -17,6 +17,8 @@ theme: minima
 #tactile
 #time machine
 
+header_pages:
+  - about/index.md
 
 exclude:
   - .sass-cache/

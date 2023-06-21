@@ -162,6 +162,12 @@ function prepareImageUrl(url, hPad, vPad) {
 		y -= parseInt(vPad / 2);
 		h += vPad;
 	}
+	if (x < 0) {
+		x = 0;
+	}
+	// check for width of image so that
+	// the width of the image is not exceeded?
+	// This will invole looking into the manifest.
 
 	let xywh = `${x},${y},${w},${h}`;
 	let newurl = `${preUrl}${xywh}${postUrl}`;
