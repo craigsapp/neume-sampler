@@ -3,7 +3,7 @@ layout: page
 title: "About"
 ---
 
-This website demonstrates how to create a neume sampler
+This website demonstrates how to build a neume sampler website
 and was created for the FCT-funded research project
 <i>Echoes from the Past: Unveiling a Lost Soundscape with Digital
 Analysis</i> (ECHOES) (2022.01957.PTDC) running from 03/2023-02/2026, run
@@ -13,7 +13,7 @@ and
 <a target="_blank" href="https://cesem.fcsh.unl.pt/en/pessoa/manuel-pedro-ferreira-en">Manuel Pedro Ferreira<a/> at the
 <a target="_blank" href="">Centro de estudios de sociologia e estética musical</a> (CESEM) in Lisbon, Portugal.
 
-There are three steps to create the website which are outlined below.  These steps are covered in
+There are three steps to build the website which are outlined below.  These steps are covered in
 more detail in the slides of a 
 <a target="_blank" href="https://bit.ly/iiif-neume-workshop-202307">workshop</a> held 19 & 20 July 2023
 at <a target="_blank" href="https://sites.google.com/view/lostandfoundcolloquium/home?authuser=0">Lost &amp; Found: Traces of Early Music: An International Colloquium on Fragmentology</a> in Cascais, Portugal.
