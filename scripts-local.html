@@ -4,18 +4,31 @@
 // vim: ts=3
 
 let DATA = {};
+DATA.METADATA_CACHE = {};
 
 document.addEventListener("DOMContentLoaded", function () {
-	let mid = "AKfycbz6DgWXf77ZfXe7DcYa7tIvyc3ZPFtBZChkqwyTZmIpu9VaCCbhWRgBjHAxMuHAwQjG";
-	let url = `https://script.google.com/macros/s/${mid}/exec`;
-	console.log("DOWNLOADING METADATA FROM URL", url);
+	// Google Apps Script macro ID:
+	DATA.MID = "AKfycbwC8exTdRM1QO9SRE34inRdHwQ6O-lU5hImkmx1ra5SHDYP5P1FNUbCDxDH5sSIwX0h";
+	// gid: Group ID, or worksheet id, with "0" being the page index.
+	let gid = "0";
+	let url = `https://script.google.com/macros/s/${DATA.MID}/exec?gid=${gid}`;
+	console.log("DOWNLOADING PAGE INDEX FROM URL", url);
 	setDefaultImageSize();
 
 	fetch(url)
 		.then(response => response.json())
 		.then(json => {
-			DATA.METADATA = json;
-			displayList(DATA.METADATA);
+			console.warn("JSON", json);
+			let obj = {};
+			for (let i=0; i<json.length; i++) {
+				let gid = json[i]["GID"];
+				if (gid) {
+					obj[gid] = json[i];
+				}
+			}
+			DATA.PAGE_INDEX_BY_GID = obj;
+console.error("XXX DATA.PAGE_INDEX_BY_GID", DATA.PAGE_INDEX_BY_GID);
+			createPageIndex(json);
 		})
 		.catch(error => {
 			console.error('Error downloading JSON:', error);
@@ -24,21 +37,140 @@ document.addEventListener("DOMContentLoaded", function () {
 });
 
 
+
 //////////////////////////////
 //
-// displayList --
+// createPageIndex -- After downloading the page index,
+//     populate the page select menu.
+//
+
+function createPageIndex(pindex) {
+	if (!pindex) {
+		pindex = DATA.PAGE_INDEX;
+	}
+	if (!pindex) {
+		console.error("ERROR: Cannot find page index object");
+		return;
+	}
+	let selement = document.querySelector("#page-select");
+	if (!selement) {
+		console.error("ERROR: Cannot find #page-select");
+	}
+	let selectedGid = "none";
+	DATA.PAGE_INDEX = pindex;
+	let output = "";
+	let count = 0;
+	for (let i=0; i<pindex.length; i++) {
+		if (!pindex[i].GID) {
+			continue;
+		}
+		if (pindex[i].Hide === "Y") {
+			continue;
+		}
+		if (!pindex[i].Name) {
+			continue;
+		}
+		let state = "";
+		if (count == 0) {
+			state = "selected";
+			selectedGid = pindex[i].GID;
+		}
+		count++;
+		output += `<option ${state} value="${pindex[i].GID}">${pindex[i].Name}</option>`;
+	}
+	selement.innerHTML = output;
+
+	let element = document.querySelector("#page-info");
+	if (element) {
+		element.classList.remove("hidden");
+	}
+
+	if (selectedGid && selectedGid !== "none") {
+		preparePage(selectedGid);
+	}
+
+}
+
+
+
+//////////////////////////////
+//
+// preparePageFromPageSelect --
+//
+
+function preparePageFromPageSelect() {
+	let selement = document.querySelector("#page-select");
+	if (!selement) {
+		console.error("ERROR: Cannot find #page-select");
+	}
+	let gid = selement.value;
+	preparePage(gid);
+}
+
+
+
+//////////////////////////////
+//
+// preparePage -- Load a particular page, using the cached version if its
+//     metadata has already been downloaded.
+//
+
+function preparePage(gid) {
+	if (!gid) {
+		console.error("ERROR: non-zero GID required:", gid);
+		return;
+	}
+	DATA.GID = gid;
+	if (DATA.METADATA_CACHE[gid]) {
+		displayList(DATA.METADATA_CACHE[gid]);
+		let imageSize = DATA.METADATA_CACHE[gid]["Size"];
+		if (imageSize) {
+			setDefaultImageSize(imageSize);
+		} else {
+			setDefaultImageSize(20);
+		}
+	} else {
+		let url = `https://script.google.com/macros/s/${DATA.MID}/exec?gid=${gid}`;
+		console.log("DOWNLOADING PAGE DATA FROM URL", url);
+
+		fetch(url)
+			.then(response => response.json())
+			.then(json => {
+				console.warn("JSON", json);
+				DATA.METADATA_CACHE[gid] = json;
+				displayList(json);
+			})
+			.catch(error => {
+				console.error('Error downloading JSON page data:', error);
+			});
+	}
+}
+
+
+
+//////////////////////////////
+//
+// displayList -- Display data for a particular page from a spreadsheet worksheet.
 //
 
 function displayList(metadata) {
 	if (!metadata) {
 		metadata = DATA.METADATA;
 	}
+	DATA.METADATA = metadata;
+
 	let isElement = document.querySelector("#image-size");
 	let imageSize = 100;
 	if (isElement) {
 		imageSize = parseInt(isElement.value);
 	}
-	localStorage.imageSize = imageSize;
+	let imageSizesByGid = sessionStorage.imageSizesByGid;
+	if (!imageSizesByGid) {
+		imageSizesByGid = {};
+	}
+	imageSizesByGid[DATA.GID] = imageSize;
+	sessionStorage.imageSizesByGid = JSON.stringify(imageSizesByGid);
+
 	let percent = imageSize;
 
 	let hElement = document.querySelector("input#horizontal");
@@ -65,8 +197,25 @@ function displayList(metadata) {
 			output += ` class="neume-heading">${neume}</h2><div class="neume-list hidden">`;
 		}
 		let imageUrl = prepareImageUrl(m["Image URL"], hPad, vPad);
+		if (!imageUrl) {
+			console.error('ERROR: Cannot find "Image URL" field in metadata', metadata[i]);
+			continue;
+		}
 		imageUrl = addPercentage(imageUrl, percent);
-		output += `<img style="padding:10px;" src="${imageUrl}">`;
+		let title = "";
+		if (metadata[i]["Source"]) {
+			title += `\nSource: ${metadata[i]["Source"]}`;
+		}
+		if (metadata[i]["Contour"]) {
+			title += `\nContour: ${metadata[i]["Contour"]}`;
+		}
+		if (metadata[i]["PEM image URL"]) {
+			output += `<a target="_blank" href="${metadata[i]["PEM image URL"]}"">`;
+		}
+		output += `<img style="padding:10px;" title="${title}" src="${imageUrl}">`;
+		if (metadata[i]["PEM image URL"]) {
+			output += "</a>";
+		}
 		lastNeume = neume;
 	}
 	output += "</div>";
@@ -94,6 +243,7 @@ function addPercentage(url, percent) {
 	if (percent > 100) {
 		return url;
 	}
+console.log("URL IS", url);
 	if (url.match(/\/pct:\d+\//)) {
 		return url.replace(/\/pct:\d+\//, `/pct:${percent}/`);
 	}
@@ -103,7 +253,7 @@ function addPercentage(url, percent) {
 	}
 	let preUrl  = matches[1];
 	let postUrl = matches[2];
-	let newUrl  = `${preUrl}pct:${percent}/${postUrl}`;
+	let newUrl  = `${preUrl}pct:${percent}${postUrl}`;
 	return newUrl;
 }
 
@@ -275,16 +425,35 @@ function showAllNeumeLists() {
 // setDefaultImageSize --
 //
 
-function setDefaultImageSize() {
-	let imageSize = localStorage.imageSize;
-	if (!imageSize) {
-		return;
-	}
+function setDefaultImageSize(gid) {
 	let select = document.querySelector("select#image-size");
 	if (!select) {
 		return;
 	}
-	select.value = imageSize;
+	select.value = 100;
+	return;
+
+	// fix code below to set different default size by gid:
+
+	let imageSizesByGid = sessionStorage.imageSizesByGid;
+	if (!imageSizesByGid) {
+		imageSizesByGid = "{}";
+	}
+	imageSizesByGid = JSON.parse(imageSizesByGid);
+console.warn("DATA.PAGE_INDEX_BY_GID", DATA.PAGE_INDEX_BY_GID);
+	let pageInfo = DATA.PAGE_INDEX_BY_GID[gid];
+	let defaultSize = imageSizesByGid[gid];
+	if (!defaultSize) {
+		if (pageInfo.Size) {
+			defaultSize = pageInfo.Size;
+		} else {
+			defaultSize = 20;
+		}
+	}
+	imageSizesByGid[gid] = defaultSize;
+	sessionStorage.imageSizesByGid = JSON.stringify(imageSizesByGid);
+	DATA.IMAGESIZESBYGID = imageSizesByGid;
+	select.value = defaultSize;
 }
 
 

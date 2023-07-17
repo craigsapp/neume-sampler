@@ -5,9 +5,19 @@ vim: ts=3
 {% include_relative scripts-local.html %}
 {% include_relative styles-local.html %}
 
-<div id="browser" style="display: inline-block">
+<div id="page-info" class="hidden">
+	<b>page</b>:
+	<select id="page-select" onchange="preparePageFromPageSelect()" style="inline-block; margin-right:20px"></select>
+	<span id="page-description"></span>
+</div>
+<br/>
+
+<div id="browser" style="display:inline-block">
 	<b>size</b>:
-	<select id="image-size" onchange="displayList()" style="inline-block; margin-right:20px;">
+	<select id="image-size" onchange="preparePageFromPageSelect()" style="inline-block; margin-right:20px;">
+		<option value="300">300%</option>
+		<option value="200">200%</option>
+		<option value="150">150%</option>
 		<option value="100">100%</option>
 		<option value="90">90%</option>
 		<option value="80">80%</option>
@@ -27,9 +37,6 @@ vim: ts=3
 	</div>
 
 	<div class="button" style="display:inline-block; width:75px; margin-left:10px;" onclick="showAllNeumeLists(event)">Show&nbsp;all</div>
-
-	
-	
 
 </div>
 
