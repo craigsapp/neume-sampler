@@ -3,6 +3,10 @@ description: Neume sampler demonstration
 github_username: craigsapp/neume-sampler
 url: "https://neume-sampler.sapp.org"
 
+# mid is the macro ID of the metadata spreadsheet's Google Apps Script where
+# JSON data will be extracted from.
+mid: "AKfycbwC8exTdRM1QO9SRE34inRdHwQ6O-lU5hImkmx1ra5SHDYP5P1FNUbCDxDH5sSIwX0h"
+
 theme: minima
 #architect
 #cayman

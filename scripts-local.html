@@ -3,12 +3,13 @@
 <script>
 // vim: ts=3
 
+// DATA stores the interface variables, such as the downloaded JSON data for each published worksheet.
 let DATA = {};
 DATA.METADATA_CACHE = {};
 
 document.addEventListener("DOMContentLoaded", function () {
 	// Google Apps Script macro ID:
-	DATA.MID = "AKfycbwC8exTdRM1QO9SRE34inRdHwQ6O-lU5hImkmx1ra5SHDYP5P1FNUbCDxDH5sSIwX0h";
+	DATA.MID = "{{ site.mid }}";
 	// gid: Group ID, or worksheet id, with "0" being the page index.
 	let gid = "0";
 	let url = `https://script.google.com/macros/s/${DATA.MID}/exec?gid=${gid}`;
@@ -27,7 +28,6 @@ document.addEventListener("DOMContentLoaded", function () {
 				}
 			}
 			DATA.PAGE_INDEX_BY_GID = obj;
-console.error("XXX DATA.PAGE_INDEX_BY_GID", DATA.PAGE_INDEX_BY_GID);
 			createPageIndex(json);
 		})
 		.catch(error => {
@@ -40,8 +40,9 @@ console.error("XXX DATA.PAGE_INDEX_BY_GID", DATA.PAGE_INDEX_BY_GID);
 
 //////////////////////////////
 //
-// createPageIndex -- After downloading the page index,
-//     populate the page select menu.
+// createPageIndex -- After downloading the page index from
+//     the Google Spreadsheet, populate the page select menu
+//     with a list of pages.
 //
 
 function createPageIndex(pindex) {
@@ -150,14 +151,48 @@ function preparePage(gid) {
 
 //////////////////////////////
 //
-// displayList -- Display data for a particular page from a spreadsheet worksheet.
+// displayPageDescription --
 //
 
-function displayList(metadata) {
+function displayPageDescription(gid) {
+	if (!gid) {
+		gid = DATA.GID;
+		if (!gid) {
+			console.warn("WARNING: no gid for description");
+			return;
+		}
+	}
+console.error("GID = ", gid);
+	let element = document.querySelector("#page-description");
+	if (!element) {
+		console.warn("WARNING: no page description element found");
+		return;
+	}
+	let description = "";
+	if (DATA.METADATA_CACHE[gid] && DATA.METADATA_CACHE[gid].Description) {
+		description = DATA.METADATA_CACHE[gid].Description;
+	}
+console.error("DESC", description);
+	element.innerHTML = description;
+}
+
+
+
+//////////////////////////////
+//
+// displayList -- Display data for a particular page from a
+//     spreadsheet worksheet.
+//
+
+function displayList(metadata, gid) {
 	if (!metadata) {
 		metadata = DATA.METADATA;
 	}
+	if (!gid) {
+		gid = DATA.gid;
+	}
 	DATA.METADATA = metadata;
+	displayPageDescription(gid);
 
 	let isElement = document.querySelector("#image-size");
 	let imageSize = 100;

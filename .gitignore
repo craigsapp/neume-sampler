@@ -3,3 +3,5 @@ Gemfile.lock
 .jekyll-metadata
 .jeiyll-cache
 _site
+_include/local/*.json
+_include/local/last-downloaded.txt
